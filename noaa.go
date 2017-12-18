@@ -96,17 +96,16 @@ func Points(lat string, lon string) (points *PointsResponse, err error) {
 	}
 	defer res.Body.Close()
 
-	var jsonResponse PointsResponse
 	decoder := json.NewDecoder(res.Body)
-	if err = decoder.Decode(&jsonResponse); err != nil {
+	if err = decoder.Decode(&points); err != nil {
 		return nil, err
 	}
-	pointsCache[endpoint] = &jsonResponse
-	return &jsonResponse, nil
+	pointsCache[endpoint] = points
+	return points, nil
 }
 
 // Stations returns an array of observation station IDs (urls)
-func Stations(lat string, lon string) ([]string, error) {
+func Stations(lat string, lon string) (stations *StationsResponse, err error) {
 	point, err := Points(lat, lon)
 	if err != nil {
 		return nil, err
@@ -117,13 +116,11 @@ func Stations(lat string, lon string) ([]string, error) {
 	}
 	defer res.Body.Close()
 
-	var jsonResponse *StationsResponse
-
 	decoder := json.NewDecoder(res.Body)
-	if err = decoder.Decode(&jsonResponse); err != nil {
+	if err = decoder.Decode(&stations); err != nil {
 		return nil, err
 	}
-	return jsonResponse.Stations, nil
+	return stations, nil
 }
 
 // Forecast returns an array of forecast observations (14 periods and 2/day max)
@@ -138,15 +135,10 @@ func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 	}
 	defer res.Body.Close()
 
-	var jsonResponse *ForecastResponse
-
-	// b, err := ioutil.ReadAll(res.Body)
-	// fmt.Printf("%s\n", b)
-
 	decoder := json.NewDecoder(res.Body)
-	if err = decoder.Decode(&jsonResponse); err != nil {
+	if err = decoder.Decode(&forecast); err != nil {
 		return nil, err
 	}
-	jsonResponse.Point = point
-	return jsonResponse, nil
+	forecast.Point = point
+	return forecast, nil
 }
