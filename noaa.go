@@ -47,17 +47,17 @@ type ForecastResponse struct {
 		Units string  `json:"unitCode"`
 	} `json:"elevation"`
 	Periods []struct {
-		ID             int32   `json:"number"`
-		Name           string  `json:"name"`
-		StartTime      string  `json:"startTime"`
-		EndTime        string  `json:"endTime"`
-		IsDaytime      bool    `json:"isDaytime"`
-		Temperature    float64 `json:"temperature"`
-		TemeratureUnit string  `json:"temperatureUnit"`
-		WindSpeed      string  `json:"windSpeed"`
-		WindDirection  string  `json:"windDirection"`
-		Summary        string  `json:"shortForecast"`
-		Details        string  `json:"detailedForecast"`
+		ID              int32   `json:"number"`
+		Name            string  `json:"name"`
+		StartTime       string  `json:"startTime"`
+		EndTime         string  `json:"endTime"`
+		IsDaytime       bool    `json:"isDaytime"`
+		Temperature     float64 `json:"temperature"`
+		TemperatureUnit string  `json:"temperatureUnit"`
+		WindSpeed       string  `json:"windSpeed"`
+		WindDirection   string  `json:"windDirection"`
+		Summary         string  `json:"shortForecast"`
+		Details         string  `json:"detailedForecast"`
 	} `json:"periods"`
 	Point *PointsResponse
 }
@@ -83,6 +83,7 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 	}
 
 	if res.StatusCode == 404 {
+		defer res.Body.Close()
 		return nil, errors.New("404: data not found for -> " + endpoint)
 	}
 	return res, nil
