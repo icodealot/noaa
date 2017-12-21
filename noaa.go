@@ -5,6 +5,7 @@ package noaa
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -79,6 +80,10 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 	res, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode == 404 {
+		return nil, errors.New("404: data not found for -> " + endpoint)
 	}
 	return res, nil
 }
