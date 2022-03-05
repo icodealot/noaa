@@ -33,6 +33,31 @@ type PointsResponse struct {
 	RadarStation                string `json:"radarStation"`
 }
 
+// OfficeResponse holds the JSON values from /offices/<id>
+type OfficeResponse struct {
+	Type    string `json:"@type"`
+	URI     string `json:"@id"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Address struct {
+		Type          string `json:"@type"`
+		StreetAddress string `json:"streetAddress"`
+		Locality      string `json:"addressLocality"`
+		Region        string `json:"addressRegion"`
+		PostalCode    string `json:"postalCode"`
+	} `json:"address"`
+	Telephone                   string   `json:"telephone"`
+	FaxNumber                   string   `json:"faxNumber"`
+	Email                       string   `json:"email"`
+	SameAs                      string   `json:"sameAs"`
+	NWSRegion                   string   `json:"nwsRegion"`
+	ParentOrganization          string   `json:"parentOrganization"`
+	ResponsibleCounties         []string `json:"responsibleCounties"`
+	ResponsibleForecastZones    []string `json:"responsibleForecastZones"`
+	ResponsibleFireZones        []string `json:"responsibleFireZones"`
+	ApprovedObservationStations []string `json:"approvedObservationStations"`
+}
+
 // StationsResponse holds the JSON values from /points/<lat,lon>/stations
 type StationsResponse struct {
 	Stations []string `json:"observationStations"`
@@ -106,47 +131,47 @@ type GridpointForecastResponse struct {
 	WindGust                         GridpointForecastTimeSeries `json:"windGust"`
 	ProbabilityOfPrecipitation       GridpointForecastTimeSeries `json:"probabilityOfPrecipitation"`
 	QuantitativePrecipitation        GridpointForecastTimeSeries `json:"quantitativePrecipitation"`
-	iceAccumulation                  GridpointForecastTimeSeries `json:"iceAccumulation"`
-	snowfallAmount                   GridpointForecastTimeSeries `json:"snowfallAmount"`
-	snowLevel                        GridpointForecastTimeSeries `json:"snowLevel"`
-	ceilingHeight                    GridpointForecastTimeSeries `json:"ceilingHeight"`
-	visibility                       GridpointForecastTimeSeries `json:"visibility"`
-	transportWindSpeed               GridpointForecastTimeSeries `json:"transportWindSpeed"`
-	transportWindDirection           GridpointForecastTimeSeries `json:"transportWindDirection"`
-	mixingHeight                     GridpointForecastTimeSeries `json:"mixingHeight"`
-	hainesIndex                      GridpointForecastTimeSeries `json:"hainesIndex"`
-	lightningActivityLevel           GridpointForecastTimeSeries `json:"lightningActivityLevel"`
-	twentyFootWindSpeed              GridpointForecastTimeSeries `json:"twentyFootWindSpeed"`
-	twentyFootWindDirection          GridpointForecastTimeSeries `json:"twentyFootWindDirection"`
-	waveHeight                       GridpointForecastTimeSeries `json:"waveHeight"`
-	wavePeriod                       GridpointForecastTimeSeries `json:"wavePeriod"`
-	waveDirection                    GridpointForecastTimeSeries `json:"waveDirection"`
-	primarySwellHeight               GridpointForecastTimeSeries `json:"primarySwellHeight"`
-	primarySwellDirection            GridpointForecastTimeSeries `json:"primarySwellDirection"`
-	secondarySwellHeight             GridpointForecastTimeSeries `json:"secondarySwellHeight"`
-	secondarySwellDirection          GridpointForecastTimeSeries `json:"secondarySwellDirection"`
-	wavePeriod2                      GridpointForecastTimeSeries `json:"wavePeriod2"`
-	windWaveHeight                   GridpointForecastTimeSeries `json:"windWaveHeight"`
-	dispersionIndex                  GridpointForecastTimeSeries `json:"dispersionIndex"`
-	pressure                         GridpointForecastTimeSeries `json:"pressure"`
-	probabilityOfTropicalStormWinds  GridpointForecastTimeSeries `json:"probabilityOfTropicalStormWinds"`
-	probabilityOfHurricaneWinds      GridpointForecastTimeSeries `json:"probabilityOfHurricaneWinds"`
-	potentialOf15mphWinds            GridpointForecastTimeSeries `json:"potentialOf15mphWinds"`
-	potentialOf25mphWinds            GridpointForecastTimeSeries `json:"potentialOf25mphWinds"`
-	potentialOf35mphWinds            GridpointForecastTimeSeries `json:"potentialOf35mphWinds"`
-	potentialOf45mphWinds            GridpointForecastTimeSeries `json:"potentialOf45mphWinds"`
-	potentialOf20mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf20mphWindGusts"`
-	potentialOf30mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf30mphWindGusts"`
-	potentialOf40mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf40mphWindGusts"`
-	potentialOf50mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf50mphWindGusts"`
-	potentialOf60mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf60mphWindGusts"`
-	grasslandFireDangerIndex         GridpointForecastTimeSeries `json:"grasslandFireDangerIndex"`
-	probabilityOfThunder             GridpointForecastTimeSeries `json:"probabilityOfThunder"`
-	davisStabilityIndex              GridpointForecastTimeSeries `json:"davisStabilityIndex"`
-	atmosphericDispersionIndex       GridpointForecastTimeSeries `json:"atmosphericDispersionIndex"`
-	lowVisibilityOccurrenceRiskIndex GridpointForecastTimeSeries `json:"lowVisibilityOccurrenceRiskIndex"`
-	stability                        GridpointForecastTimeSeries `json:"stability"`
-	redFlagThreatIndex               GridpointForecastTimeSeries `json:"redFlagThreatIndex"`
+	IceAccumulation                  GridpointForecastTimeSeries `json:"iceAccumulation"`
+	SnowfallAmount                   GridpointForecastTimeSeries `json:"snowfallAmount"`
+	SnowLevel                        GridpointForecastTimeSeries `json:"snowLevel"`
+	CeilingHeight                    GridpointForecastTimeSeries `json:"ceilingHeight"`
+	Visibility                       GridpointForecastTimeSeries `json:"visibility"`
+	TransportWindSpeed               GridpointForecastTimeSeries `json:"transportWindSpeed"`
+	TransportWindDirection           GridpointForecastTimeSeries `json:"transportWindDirection"`
+	MixingHeight                     GridpointForecastTimeSeries `json:"mixingHeight"`
+	HainesIndex                      GridpointForecastTimeSeries `json:"hainesIndex"`
+	LightningActivityLevel           GridpointForecastTimeSeries `json:"lightningActivityLevel"`
+	TwentyFootWindSpeed              GridpointForecastTimeSeries `json:"twentyFootWindSpeed"`
+	TwentyFootWindDirection          GridpointForecastTimeSeries `json:"twentyFootWindDirection"`
+	WaveHeight                       GridpointForecastTimeSeries `json:"waveHeight"`
+	WavePeriod                       GridpointForecastTimeSeries `json:"wavePeriod"`
+	WaveDirection                    GridpointForecastTimeSeries `json:"waveDirection"`
+	PrimarySwellHeight               GridpointForecastTimeSeries `json:"primarySwellHeight"`
+	PrimarySwellDirection            GridpointForecastTimeSeries `json:"primarySwellDirection"`
+	SecondarySwellHeight             GridpointForecastTimeSeries `json:"secondarySwellHeight"`
+	SecondarySwellDirection          GridpointForecastTimeSeries `json:"secondarySwellDirection"`
+	WavePeriod2                      GridpointForecastTimeSeries `json:"wavePeriod2"`
+	WindWaveHeight                   GridpointForecastTimeSeries `json:"windWaveHeight"`
+	DispersionIndex                  GridpointForecastTimeSeries `json:"dispersionIndex"`
+	Pressure                         GridpointForecastTimeSeries `json:"pressure"`
+	ProbabilityOfTropicalStormWinds  GridpointForecastTimeSeries `json:"probabilityOfTropicalStormWinds"`
+	ProbabilityOfHurricaneWinds      GridpointForecastTimeSeries `json:"probabilityOfHurricaneWinds"`
+	PotentialOf15mphWinds            GridpointForecastTimeSeries `json:"potentialOf15mphWinds"`
+	PotentialOf25mphWinds            GridpointForecastTimeSeries `json:"potentialOf25mphWinds"`
+	PotentialOf35mphWinds            GridpointForecastTimeSeries `json:"potentialOf35mphWinds"`
+	PotentialOf45mphWinds            GridpointForecastTimeSeries `json:"potentialOf45mphWinds"`
+	PotentialOf20mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf20mphWindGusts"`
+	PotentialOf30mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf30mphWindGusts"`
+	PotentialOf40mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf40mphWindGusts"`
+	PotentialOf50mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf50mphWindGusts"`
+	PotentialOf60mphWindGusts        GridpointForecastTimeSeries `json:"potentialOf60mphWindGusts"`
+	GrasslandFireDangerIndex         GridpointForecastTimeSeries `json:"grasslandFireDangerIndex"`
+	ProbabilityOfThunder             GridpointForecastTimeSeries `json:"probabilityOfThunder"`
+	DavisStabilityIndex              GridpointForecastTimeSeries `json:"davisStabilityIndex"`
+	AtmosphericDispersionIndex       GridpointForecastTimeSeries `json:"atmosphericDispersionIndex"`
+	LowVisibilityOccurrenceRiskIndex GridpointForecastTimeSeries `json:"lowVisibilityOccurrenceRiskIndex"`
+	Stability                        GridpointForecastTimeSeries `json:"stability"`
+	RedFlagThreatIndex               GridpointForecastTimeSeries `json:"redFlagThreatIndex"`
 	Point                            *PointsResponse
 }
 
@@ -155,7 +180,7 @@ type GridpointForecastTimeSeries struct {
 	Uom    string `json:"uom"` // Unit of Measure
 	Values []struct {
 		ValidTime string  `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
-		Value     float64 `json:value"`
+		Value     float64 `json:"value"`
 	} `json:"values"`
 }
 
@@ -206,6 +231,24 @@ func Points(lat string, lon string) (points *PointsResponse, err error) {
 	}
 	pointsCache[endpoint] = points
 	return points, nil
+}
+
+// Details for a specific office identified by its ID
+// For example, https://api.weather.gov/offices/LOT (Chicago)
+func Office(id string) (office *OfficeResponse, err error) {
+	endpoint := fmt.Sprintf("%s/offices/%s", API, id)
+
+	res, err := apiCall(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	decoder := json.NewDecoder(res.Body)
+	if err = decoder.Decode(&office); err != nil {
+		return nil, err
+	}
+	return office, nil
 }
 
 // Stations returns an array of observation station IDs (urls)

@@ -13,6 +13,10 @@ noaa.Points(lat string, lon string) (points *PointsResponse, err error)
 ```
 
 ```go
+noaa.Office(id string) (office *OfficeResponse, err error)
+```
+
+```go
 noaa.Stations(lat string, lon string) (stations *StationsResponse, err error) {
 ```
 
@@ -39,7 +43,7 @@ import (
 )
 
 func main() {
-	forecast, err := noaa.Forecast("30.5835", "-97.8575")
+	forecast, err := noaa.Forecast("41.837", "-87.685") // Chicago, IL
 	if err != nil {
 		fmt.Printf("Error getting the forecast: %v", err)
 		return

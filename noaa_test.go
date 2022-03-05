@@ -1,8 +1,9 @@
 package noaa_test
 
 import (
-	"github.com/icodealot/noaa"
 	"testing"
+
+	"github.com/icodealot/noaa"
 )
 
 func TestBlank(t *testing.T) {
@@ -51,4 +52,14 @@ func TestAlaska(t *testing.T) {
 		return
 	}
 	t.Error("noaa.Points() should return valid points for parts of Alaska.")
+}
+
+func TestChicagoOffice(t *testing.T) {
+	office, err := noaa.Office("LOT")
+	if office != nil && err == nil {
+		if office.Name == "Chicago, IL" {
+			return
+		}
+	}
+	t.Error("noaa.Office(\"LOT\") should return valid office information.")
 }
