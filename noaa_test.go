@@ -54,6 +54,30 @@ func TestAlaska(t *testing.T) {
 	t.Error("noaa.Points() should return valid points for parts of Alaska.")
 }
 
+func TestMetricUnits(t *testing.T) {
+	noaa.SetUnits("si")
+	forecast, err := noaa.Forecast("41.837", "-87.685")
+	if err != nil {
+		t.Error("noaa.Forecast() should return valid data for Chicago.")
+	}
+	if forecast.Units == "si" {
+		return
+	}
+	t.Error("noaa.Forecast() should return valid data for Chicago in Metric.")
+}
+
+func TestUSUnits(t *testing.T) {
+	noaa.SetUnits("us")
+	forecast, err := noaa.Forecast("41.837", "-87.685")
+	if err != nil {
+		t.Error("noaa.Forecast() should return valid data for Chicago.")
+	}
+	if forecast.Units == "us" {
+		return
+	}
+	t.Error("noaa.Forecast() should return valid data for Chicago in standard units.")
+}
+
 func TestChicagoOffice(t *testing.T) {
 	office, err := noaa.Office("LOT")
 	if office != nil && err == nil {

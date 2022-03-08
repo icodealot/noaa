@@ -270,13 +270,27 @@ func Stations(lat string, lon string) (stations *StationsResponse, err error) {
 	return stations, nil
 }
 
+var units = "" // can be set as "us" (the default) or "si" for metric
+
+func SetUnits(uom string) {
+	if uom != "us" && uom != "si" {
+		units = ""
+	} else {
+		units = uom
+	}
+}
+
 // Forecast returns an array of forecast observations (14 periods and 2/day max)
 func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
+	query := ""
 	point, err := Points(lat, lon)
 	if err != nil {
 		return nil, err
 	}
-	res, err := apiCall(point.EndpointForecast)
+	if units != "" {
+		query = "?units=" + units
+	}
+	res, err := apiCall(point.EndpointForecast + query)
 	if err != nil {
 		return nil, err
 	}
