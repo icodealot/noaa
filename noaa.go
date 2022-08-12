@@ -96,6 +96,7 @@ type ForecastResponsePeriod struct {
 	Details         string  `json:"detailedForecast"`
 }
 
+// ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
 type ForecastResponsePeriodHourly struct {
 	ID               int32   `json:"number"`
 	Name             string  `json:"name"`
@@ -137,14 +138,16 @@ type Weather struct {
 	Values []*WeatherValue `json:"values"`
 }
 
-// HazardValueItem holds a value item from a GridpointForecastResponse's hazard.values[x].value[x].
+// HazardValueItem holds a value item from a GridpointForecastResponse's
+// hazard.values[x].value[x].
 type HazardValueItem struct {
 	Phenomenon   string `json:"phenomenon"`
 	Significance string `json:"significance"`
 	EventNumber  int32  `json:"event_number"`
 }
 
-// HazardValue holds a hazard value from a GridpointForecastResponse's hazard.values[x].
+// HazardValue holds a hazard value from a GridpointForecastResponse's
+// hazard.values[x].
 type HazardValue struct {
 	ValidTime string             `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
 	Value     []*HazardValueItem `json:"value"`
@@ -155,6 +158,7 @@ type Hazard struct {
 	Values []*HazardValue `json:"values"`
 }
 
+// HourlyForecastResponse holds the JSON values for the hourly forecast.
 type HourlyForecastResponse struct {
 	Updated           string                          `json:"updated"`
 	Units             string                          `json:"units"`
@@ -232,6 +236,8 @@ type GridpointForecastResponse struct {
 	Point                            *PointsResponse
 }
 
+// GridpointForecastTimeSeriesValue holds the JSON value for a
+// GridpointForecastTimeSeries' values[x] item.
 type GridpointForecastTimeSeriesValue struct {
 	ValidTime string  `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
 	Value     float64 `json:"value"`
