@@ -44,21 +44,21 @@ type OfficeAddress struct {
 
 // OfficeResponse holds the JSON values from /offices/<id>
 type OfficeResponse struct {
-	Type                        string         `json:"@type"`
-	URI                         string         `json:"@id"`
-	ID                          string         `json:"id"`
-	Name                        string         `json:"name"`
-	Address                     *OfficeAddress `json:"address"`
-	Telephone                   string         `json:"telephone"`
-	FaxNumber                   string         `json:"faxNumber"`
-	Email                       string         `json:"email"`
-	SameAs                      string         `json:"sameAs"`
-	NWSRegion                   string         `json:"nwsRegion"`
-	ParentOrganization          string         `json:"parentOrganization"`
-	ResponsibleCounties         []string       `json:"responsibleCounties"`
-	ResponsibleForecastZones    []string       `json:"responsibleForecastZones"`
-	ResponsibleFireZones        []string       `json:"responsibleFireZones"`
-	ApprovedObservationStations []string       `json:"approvedObservationStations"`
+	Type                        string        `json:"@type"`
+	URI                         string        `json:"@id"`
+	ID                          string        `json:"id"`
+	Name                        string        `json:"name"`
+	Address                     OfficeAddress `json:"address"`
+	Telephone                   string        `json:"telephone"`
+	FaxNumber                   string        `json:"faxNumber"`
+	Email                       string        `json:"email"`
+	SameAs                      string        `json:"sameAs"`
+	NWSRegion                   string        `json:"nwsRegion"`
+	ParentOrganization          string        `json:"parentOrganization"`
+	ResponsibleCounties         []string      `json:"responsibleCounties"`
+	ResponsibleForecastZones    []string      `json:"responsibleForecastZones"`
+	ResponsibleFireZones        []string      `json:"responsibleFireZones"`
+	ApprovedObservationStations []string      `json:"approvedObservationStations"`
 }
 
 // StationsResponse holds the JSON values from /points/<lat,lon>/stations
@@ -98,25 +98,25 @@ type ForecastResponsePeriod struct {
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
 type ForecastResponsePeriodHourly struct {
-	ID               int32   `json:"number"`
-	Name             string  `json:"name"`
-	StartTime        string  `json:"startTime"`
-	EndTime          string  `json:"endTime"`
-	IsDaytime        bool    `json:"isDaytime"`
-	TemperatureTrend *string `json:"temperatureTrend"`
-	WindDirection    string  `json:"windDirection"`
-	Summary          string  `json:"shortForecast"`
-	Icon             string  `json:"icon,omitempty"`
-	Details          string  `json:"detailedForecast"`
+	ID               int32  `json:"number"`
+	Name             string `json:"name"`
+	StartTime        string `json:"startTime"`
+	EndTime          string `json:"endTime"`
+	IsDaytime        bool   `json:"isDaytime"`
+	TemperatureTrend string `json:"temperatureTrend"`
+	WindDirection    string `json:"windDirection"`
+	Summary          string `json:"shortForecast"`
+	Icon             string `json:"icon,omitempty"`
+	Details          string `json:"detailedForecast"`
 }
 
 // ForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>/forecast"
 type ForecastResponse struct {
 	// capture data from the forecast
-	Updated   string                    `json:"updated"`
-	Units     string                    `json:"units"`
-	Elevation *ForecastElevation        `json:"elevation"`
-	Periods   []*ForecastResponsePeriod `json:"periods"`
+	Updated   string                   `json:"updated"`
+	Units     string                   `json:"units"`
+	Elevation ForecastElevation        `json:"elevation"`
+	Periods   []ForecastResponsePeriod `json:"periods"`
 	Point     *PointsResponse
 }
 
@@ -129,13 +129,13 @@ type WeatherValueItem struct {
 
 // WeatherValue holds the JSON value for a weather.values[x] value.
 type WeatherValue struct {
-	ValidTime string              `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
-	Value     []*WeatherValueItem `json:"value"`
+	ValidTime string             `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
+	Value     []WeatherValueItem `json:"value"`
 }
 
 // Weather holds the JSON value for the weather object.
 type Weather struct {
-	Values []*WeatherValue `json:"values"`
+	Values []WeatherValue `json:"values"`
 }
 
 // HazardValueItem holds a value item from a GridpointForecastResponse's
@@ -149,24 +149,24 @@ type HazardValueItem struct {
 // HazardValue holds a hazard value from a GridpointForecastResponse's
 // hazard.values[x].
 type HazardValue struct {
-	ValidTime string             `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
-	Value     []*HazardValueItem `json:"value"`
+	ValidTime string            `json:"validTime"` // ISO 8601 time interval, e.g. 2019-07-04T18:00:00+00:00/PT3H
+	Value     []HazardValueItem `json:"value"`
 }
 
 // Hazard holds a hazard item from a GridpointForecastRespones's hazards
 type Hazard struct {
-	Values []*HazardValue `json:"values"`
+	Values []HazardValue `json:"values"`
 }
 
 // HourlyForecastResponse holds the JSON values for the hourly forecast.
 type HourlyForecastResponse struct {
-	Updated           string                          `json:"updated"`
-	Units             string                          `json:"units"`
-	ForecastGenerator string                          `json:"forecastGenerator"`
-	GeneratedAt       string                          `json:"generatedAt"`
-	UpdateTime        string                          `json:"updateTime"`
-	ValidTimes        string                          `json:"validTimes"`
-	Periods           []*ForecastResponsePeriodHourly `json:"periods"`
+	Updated           string                         `json:"updated"`
+	Units             string                         `json:"units"`
+	ForecastGenerator string                         `json:"forecastGenerator"`
+	GeneratedAt       string                         `json:"generatedAt"`
+	UpdateTime        string                         `json:"updateTime"`
+	ValidTimes        string                         `json:"validTimes"`
+	Periods           []ForecastResponsePeriodHourly `json:"periods"`
 	Point             *PointsResponse
 }
 
@@ -175,9 +175,9 @@ type HourlyForecastResponse struct {
 type GridpointForecastResponse struct {
 	// capture data from the forecast
 	Updated                          string                      `json:"updateTime"`
-	Elevation                        *ForecastElevation          `json:"elevation"`
-	Weather                          *Weather                    `json:"weather"`
-	Hazards                          *Hazard                     `json:"hazards"`
+	Elevation                        ForecastElevation           `json:"elevation"`
+	Weather                          Weather                     `json:"weather"`
+	Hazards                          Hazard                      `json:"hazards"`
 	Temperature                      GridpointForecastTimeSeries `json:"temperature"`
 	Dewpoint                         GridpointForecastTimeSeries `json:"dewpoint"`
 	MaxTemperature                   GridpointForecastTimeSeries `json:"maxTemperature"`
@@ -245,8 +245,8 @@ type GridpointForecastTimeSeriesValue struct {
 
 // GridpointForecastTimeSeries holds a series of data from a gridpoint forecast
 type GridpointForecastTimeSeries struct {
-	Uom    string                              `json:"uom"` // Unit of Measure
-	Values []*GridpointForecastTimeSeriesValue `json:"values"`
+	Uom    string                             `json:"uom"` // Unit of Measure
+	Values []GridpointForecastTimeSeriesValue `json:"values"`
 }
 
 // Cache used for point lookup to save some HTTP round trips
