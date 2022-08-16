@@ -87,3 +87,13 @@ func TestChicagoOffice(t *testing.T) {
 	}
 	t.Error("noaa.Office(\"LOT\") should return valid office information.")
 }
+
+func TestChicagoHourly(t *testing.T) {
+	hourly, err := noaa.HourlyForecast("41.837", "-87.685")
+	if err != nil {
+		t.Error("noaa.HourlyForecast() should return valid data for Chicago.")
+	}
+	if len(hourly.Periods) == 0 {
+		t.Error("expected at least one period")
+	}
+}
