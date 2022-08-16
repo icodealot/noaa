@@ -28,6 +28,10 @@ noaa.Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 noaa.GridpointForecast(lat string, lon string) (forecast *GridpointForecastResponse, err error) {
 ```
 
+```go
+noaa.HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, err error) {
+```
+
 For convenience, the ForecastResponse includes a reference to the PointsResponse obtained. In 2017 api.weather.gov was updated with a new REST API that requires multiple calls to obtain the relevant information for the coordinates given by latitude and longitude.
 
 ## Example
