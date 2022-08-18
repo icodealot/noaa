@@ -98,16 +98,18 @@ type ForecastResponsePeriod struct {
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
 type ForecastResponsePeriodHourly struct {
-	ID               int32  `json:"number"`
-	Name             string `json:"name"`
-	StartTime        string `json:"startTime"`
-	EndTime          string `json:"endTime"`
-	IsDaytime        bool   `json:"isDaytime"`
-	TemperatureTrend string `json:"temperatureTrend"`
-	WindDirection    string `json:"windDirection"`
-	Summary          string `json:"shortForecast"`
-	Icon             string `json:"icon,omitempty"`
-	Details          string `json:"detailedForecast"`
+	ID              int32   `json:"number"`
+	Name            string  `json:"name"`
+	StartTime       string  `json:"startTime"`
+	EndTime         string  `json:"endTime"`
+	IsDaytime       bool    `json:"isDaytime"`
+	Temperature     float64 `json:"temperature"`
+	TemperatureUnit string  `json:"temperatureUnit"`
+	WindSpeed       string  `json:"windSpeed"`
+	WindDirection   string  `json:"windDirection"`
+	Icon            string  `json:"icon"`
+	Summary         string  `json:"shortForecast"`
+	Details         string  `json:"detailedForecast"`
 }
 
 // ForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>/forecast"
