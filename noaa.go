@@ -20,7 +20,7 @@ const (
 
 // UserAgent provides the User-Agent header value used for API request.
 // This defaults to the APIKey const value.
-var UserAgent = APIKey
+var userAgent = APIKey
 
 // PointsResponse holds the JSON values from /points/<lat,lon>
 type PointsResponse struct {
@@ -270,7 +270,7 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 		return nil, err
 	}
 	req.Header.Add("Accept", APIAccept)
-	req.Header.Add("User-Agent", UserAgent) // See http://www.weather.gov/documentation/services-web-api
+	req.Header.Add("User-Agent", userAgent) // See http://www.weather.gov/documentation/services-web-api
 
 	res, err = http.DefaultClient.Do(req)
 	if err != nil {
@@ -282,6 +282,14 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 		return nil, errors.New("404: data not found for -> " + endpoint)
 	}
 	return res, nil
+}
+
+// SetUserAgent changes the string used for the User-Agent header when making
+// requests.  See https://www.weather.gov/documentation/services-web-api
+// (Authentication) for details.  By default, this library uses APIKey for this
+// value.
+func SetUserAgent(useragent string) {
+	userAgent = useragent
 }
 
 // Points returns a set of useful endpoints for a given <lat,lon>
