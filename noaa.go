@@ -18,6 +18,10 @@ const (
 	APIAccept = "application/ld+json"       // Changes may affect struct mappings below
 )
 
+// UserAgent provides the User-Agent header value used for API request.
+// This defaults to the APIKey const value.
+var userAgent = APIKey
+
 // PointsResponse holds the JSON values from /points/<lat,lon>
 type PointsResponse struct {
 	ID                          string `json:"@id"`
@@ -82,32 +86,36 @@ type ForecastHourlyElevation struct {
 
 // Period holds the JSON values for a period within a forecast response's periods.
 type ForecastResponsePeriod struct {
-	ID              int32   `json:"number"`
-	Name            string  `json:"name"`
-	StartTime       string  `json:"startTime"`
-	EndTime         string  `json:"endTime"`
-	IsDaytime       bool    `json:"isDaytime"`
-	Temperature     float64 `json:"temperature"`
-	TemperatureUnit string  `json:"temperatureUnit"`
-	WindSpeed       string  `json:"windSpeed"`
-	WindDirection   string  `json:"windDirection"`
-	Icon            string  `json:"icon"`
-	Summary         string  `json:"shortForecast"`
-	Details         string  `json:"detailedForecast"`
+	ID               int32   `json:"number"`
+	Name             string  `json:"name"`
+	StartTime        string  `json:"startTime"`
+	EndTime          string  `json:"endTime"`
+	IsDaytime        bool    `json:"isDaytime"`
+	Temperature      float64 `json:"temperature"`
+	TemperatureUnit  string  `json:"temperatureUnit"`
+	TemperatureTrend string  `json:"temperatureTrend"`
+	WindSpeed        string  `json:"windSpeed"`
+	WindDirection    string  `json:"windDirection"`
+	Icon             string  `json:"icon"`
+	Summary          string  `json:"shortForecast"`
+	Details          string  `json:"detailedForecast"`
 }
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
 type ForecastResponsePeriodHourly struct {
-	ID               int32  `json:"number"`
-	Name             string `json:"name"`
-	StartTime        string `json:"startTime"`
-	EndTime          string `json:"endTime"`
-	IsDaytime        bool   `json:"isDaytime"`
-	TemperatureTrend string `json:"temperatureTrend"`
-	WindDirection    string `json:"windDirection"`
-	Summary          string `json:"shortForecast"`
-	Icon             string `json:"icon,omitempty"`
-	Details          string `json:"detailedForecast"`
+	ID               int32   `json:"number"`
+	Name             string  `json:"name"`
+	StartTime        string  `json:"startTime"`
+	EndTime          string  `json:"endTime"`
+	IsDaytime        bool    `json:"isDaytime"`
+	Temperature      float64 `json:"temperature"`
+	TemperatureUnit  string  `json:"temperatureUnit"`
+	TemperatureTrend string  `json:"temperatureTrend"`
+	WindSpeed        string  `json:"windSpeed"`
+	WindDirection    string  `json:"windDirection"`
+	Icon             string  `json:"icon"`
+	Summary          string  `json:"shortForecast"`
+	Details          string  `json:"detailedForecast"`
 }
 
 // ForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>/forecast"
@@ -262,7 +270,7 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 		return nil, err
 	}
 	req.Header.Add("Accept", APIAccept)
-	req.Header.Add("User-Agent", APIKey) // See http://www.weather.gov/documentation/services-web-api
+	req.Header.Add("User-Agent", userAgent) // See http://www.weather.gov/documentation/services-web-api
 
 	res, err = http.DefaultClient.Do(req)
 	if err != nil {
@@ -274,6 +282,14 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 		return nil, errors.New("404: data not found for -> " + endpoint)
 	}
 	return res, nil
+}
+
+// SetUserAgent changes the string used for the User-Agent header when making
+// requests.  See https://www.weather.gov/documentation/services-web-api
+// (Authentication) for details.  By default, this library uses APIKey for this
+// value.
+func SetUserAgent(useragent string) {
+	userAgent = useragent
 }
 
 // Points returns a set of useful endpoints for a given <lat,lon>
