@@ -6,7 +6,7 @@ Data on various weather.gov API endpoints is measured at different intervals. If
 
 ## API
 
-This API is currenly a minimal subset of what api.weather.gov supports and includes the following:
+This API is currently a minimal subset of what api.weather.gov supports and includes the following:
 
 ```go
 noaa.Points(lat string, lon string) (points *PointsResponse, err error)
@@ -34,9 +34,29 @@ noaa.HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, 
 
 For convenience, the ForecastResponse includes a reference to the PointsResponse obtained. In 2017 api.weather.gov was updated with a new REST API that requires multiple calls to obtain the relevant information for the coordinates given by latitude and longitude.
 
-## Example
+## Setup
 
-Here is an example of using the `github.com/icodealot/noaa` package for Go to pull the forecasted temperatures by day.
+Assuming a working `go` toolchain is in place this module can be installed with:
+
+```
+go get -u github.com/icodealot/noaa
+```
+
+## Examples
+
+There are testable examples in `example_test.go` which can be run using:
+
+```
+go test -tags=examples -v
+```
+
+A specific example can be run using:
+
+```
+go test -tags=examples -run ^ExampleGetChicagoForecast$ -v
+```
+
+Here is an example of using the `github.com/icodealot/noaa` module to get forecasted temperatures by day.
 
 ```go
 package main
@@ -53,7 +73,7 @@ func main() {
 		return
 	}
 	for _, period := range forecast.Periods {
-		fmt.Printf("%-20s ---> %.0f\n", period.Name, period.Temperature)
+		fmt.Printf("%-20s ---> %.0f%s\n", period.Name, period.Temperature, period.TemperatureUnit)
 	}
 }
 ```
@@ -61,20 +81,20 @@ func main() {
 Which will output something like the following:
 
 ```bash
-This Afternoon       ---> 59
-Tonight              ---> 55
-Tuesday              ---> 67
-Tuesday Night        ---> 47
-Wednesday            ---> 72
-Wednesday Night      ---> 50
-Thursday             ---> 72
-Thursday Night       ---> 51
-Friday               ---> 62
-Friday Night         ---> 36
-Saturday             ---> 52
-Saturday Night       ---> 36
-Sunday               ---> 45
-Sunday Night         ---> 28
+This Afternoon       ---> 59F
+Tonight              ---> 55F
+Tuesday              ---> 67F
+Tuesday Night        ---> 47F
+Wednesday            ---> 72F
+Wednesday Night      ---> 50F
+Thursday             ---> 72F
+Thursday Night       ---> 51F
+Friday               ---> 62F
+Friday Night         ---> 36F
+Saturday             ---> 52F
+Saturday Night       ---> 36F
+Sunday               ---> 45F
+Sunday Night         ---> 28F
 ```
 
-Check out the code for more details. This package is still super unfinished and pretty unstable with respect to changes so if you want to insulate yourself then please fork the project as needed.
+Check out the types in `noaa.go` for more details about fields returned by the weather API.

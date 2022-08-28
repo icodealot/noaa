@@ -11,16 +11,20 @@ import (
 	"strings"
 )
 
-// Constant values for the weather.gov REST API
+// deprecated
+// Default values for the weather.gov REST API config which will
+// be replaced by Config. These are subject to deletion in the future.
+// Instead, use noaa.GetConfig followed by:
+//     Config.BaseURL, Config.UserAgent, Config.Accept
 const (
 	API       = "https://api.weather.gov"
-	APIKey    = "github.com/icodealot/noaa" // See auth docs at weather.gov
+	APIKey    = "github.com/icodealot/noaa" // User-Agent default value
 	APIAccept = "application/ld+json"       // Changes may affect struct mappings below
 )
 
-// UserAgent provides the User-Agent header value used for API request.
-// This defaults to the APIKey const value.
-var userAgent = APIKey
+// Cache used for point lookup to save some HTTP round trips
+// key is expected to be PointsResponse.ID
+var pointsCache = map[string]*PointsResponse{}
 
 // PointsResponse holds the JSON values from /points/<lat,lon>
 type PointsResponse struct {
@@ -70,7 +74,7 @@ type StationsResponse struct {
 	Stations []string `json:"observationStations"`
 }
 
-// ForecastElevaion holds the JSON values for a forecast response's elevation.
+// ForecastElevation holds the JSON values for a forecast response's elevation.
 type ForecastElevation struct {
 	Value float64 `json:"value"`
 	Units string  `json:"unitCode"`
@@ -84,7 +88,7 @@ type ForecastHourlyElevation struct {
 	QualityControl string  `json:"qualityControl"`
 }
 
-// Period holds the JSON values for a period within a forecast response's periods.
+// ForecastResponsePeriod holds the JSON values for a period within a forecast response.
 type ForecastResponsePeriod struct {
 	ID               int32   `json:"number"`
 	Name             string  `json:"name"`
@@ -103,19 +107,7 @@ type ForecastResponsePeriod struct {
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
 type ForecastResponsePeriodHourly struct {
-	ID               int32   `json:"number"`
-	Name             string  `json:"name"`
-	StartTime        string  `json:"startTime"`
-	EndTime          string  `json:"endTime"`
-	IsDaytime        bool    `json:"isDaytime"`
-	Temperature      float64 `json:"temperature"`
-	TemperatureUnit  string  `json:"temperatureUnit"`
-	TemperatureTrend string  `json:"temperatureTrend"`
-	WindSpeed        string  `json:"windSpeed"`
-	WindDirection    string  `json:"windDirection"`
-	Icon             string  `json:"icon"`
-	Summary          string  `json:"shortForecast"`
-	Details          string  `json:"detailedForecast"`
+	ForecastResponsePeriod
 }
 
 // ForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>/forecast"
@@ -161,7 +153,7 @@ type HazardValue struct {
 	Value     []HazardValueItem `json:"value"`
 }
 
-// Hazard holds a hazard item from a GridpointForecastRespones's hazards
+// Hazard holds a slice of HazardValue items from a GridpointForecastResponse hazards
 type Hazard struct {
 	Values []HazardValue `json:"values"`
 }
@@ -257,10 +249,6 @@ type GridpointForecastTimeSeries struct {
 	Values []GridpointForecastTimeSeriesValue `json:"values"`
 }
 
-// Cache used for point lookup to save some HTTP round trips
-// key is expected to be PointsResponse.ID
-var pointsCache = map[string]*PointsResponse{}
-
 // Call the weather.gov API. We could just use http.Get() but
 // since we need to include some custom header values this helps.
 func apiCall(endpoint string) (res *http.Response, err error) {
@@ -269,33 +257,25 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Accept", APIAccept)
-	req.Header.Add("User-Agent", userAgent) // See http://www.weather.gov/documentation/services-web-api
+	req.Header.Add("Accept", config.Accept)
+	req.Header.Add("User-Agent", config.UserAgent)
 
 	res, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.StatusCode == 404 {
-		defer res.Body.Close()
-		return nil, errors.New("404: data not found for -> " + endpoint)
+	if res.StatusCode != 200 {
+		return nil, errors.New(fmt.Sprintf("%d %s", res.StatusCode, res.Status))
 	}
-	return res, nil
-}
 
-// SetUserAgent changes the string used for the User-Agent header when making
-// requests.  See https://www.weather.gov/documentation/services-web-api
-// (Authentication) for details.  By default, this library uses APIKey for this
-// value.
-func SetUserAgent(useragent string) {
-	userAgent = useragent
+	return res, nil
 }
 
 // Points returns a set of useful endpoints for a given <lat,lon>
 // or returns a cached object if appropriate
 func Points(lat string, lon string) (points *PointsResponse, err error) {
-	endpoint := fmt.Sprintf("%s/points/%s,%s", API, lat, lon)
+	endpoint := fmt.Sprintf("%s/points/%s,%s", config.BaseURL, lat, lon)
 	if pointsCache[endpoint] != nil {
 		return pointsCache[endpoint], nil
 	}
@@ -314,10 +294,10 @@ func Points(lat string, lon string) (points *PointsResponse, err error) {
 	return points, nil
 }
 
-// Details for a specific office identified by its ID
+// Office returns details for a specific office identified by its ID
 // For example, https://api.weather.gov/offices/LOT (Chicago)
 func Office(id string) (office *OfficeResponse, err error) {
-	endpoint := fmt.Sprintf("%s/offices/%s", API, id)
+	endpoint := fmt.Sprintf("%s/offices/%s", config.BaseURL, id)
 
 	res, err := apiCall(endpoint)
 	if err != nil {
@@ -351,16 +331,6 @@ func Stations(lat string, lon string) (stations *StationsResponse, err error) {
 	return stations, nil
 }
 
-var units = "" // can be set as "us" (the default) or "si" for metric
-
-func SetUnits(uom string) {
-	if uom != "us" && uom != "si" {
-		units = ""
-	} else {
-		units = uom
-	}
-}
-
 // Forecast returns an array of forecast observations (14 periods and 2/day max)
 func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 	query := ""
@@ -368,8 +338,8 @@ func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 	if err != nil {
 		return nil, err
 	}
-	if units != "" {
-		query = "?units=" + units
+	if config.Units != "" {
+		query = "?units=" + config.Units
 	}
 	res, err := apiCall(point.EndpointForecast + query)
 	if err != nil {
@@ -387,11 +357,15 @@ func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 
 // GridpointForecast returns an array of raw forecast data
 func GridpointForecast(lat string, long string) (forecast *GridpointForecastResponse, err error) {
+	query := ""
 	point, err := Points(lat, long)
 	if err != nil {
 		return nil, err
 	}
-	res, err := apiCall(point.EndpointForecastGridData)
+	if config.Units != "" {
+		query = "?units=" + config.Units
+	}
+	res, err := apiCall(point.EndpointForecastGridData + query)
 	if err != nil {
 		return nil, err
 	}
@@ -407,11 +381,15 @@ func GridpointForecast(lat string, long string) (forecast *GridpointForecastResp
 
 // HourlyForecast returns an array of raw hourly forecast data
 func HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, err error) {
+	query := ""
 	point, err := Points(lat, long)
 	if err != nil {
 		return nil, err
 	}
-	res, err := apiCall(point.EndpointForecastHourly)
+	if config.Units != "" {
+		query = "?units=" + config.Units
+	}
+	res, err := apiCall(point.EndpointForecastHourly + query)
 	if err != nil {
 		return nil, err
 	}
