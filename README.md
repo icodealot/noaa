@@ -6,14 +6,14 @@ Data on various weather.gov API endpoints is measured at different intervals. If
 
 ## API
 
-This API is currently a minimal subset of what api.weather.gov supports and includes the following:
+`noaa` is a Go client for the weather.gov API and supports the following endpoints:
 
 ```go
-noaa.Points(lat string, lon string) (points *PointsResponse, err error)
+noaa.Points(lat string, lon string) (points *PointsResponse, err error) {
 ```
 
 ```go
-noaa.Office(id string) (office *OfficeResponse, err error)
+noaa.Office(id string) (office *OfficeResponse, err error) {
 ```
 
 ```go
@@ -63,6 +63,7 @@ package main
 
 import (
 	"fmt"
+	
 	"github.com/icodealot/noaa"
 )
 

@@ -265,7 +265,7 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 		return nil, err
 	}
 
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return nil, errors.New(fmt.Sprintf("%d %s", res.StatusCode, res.Status))
 	}
 

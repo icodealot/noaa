@@ -11,16 +11,15 @@ var config = GetDefaultConfig()
 // future weather.gov might change this behavior.
 // See http://www.weather.gov/documentation/services-web-api
 type Config struct {
-	BaseURL   string `json:"baseUrl"` // not including a trailing slash
+	BaseURL   string `json:"baseUrl"` // Do not include a trailing slash
 	UserAgent string `json:"apiKey"`  // ex. (myweatherapp.com, contact@myweatherapp.com)
 	Accept    string `json:"accept"`  // application/geo+json, etc. defaults to ld+json
 	Units     string `json:"units"`   // "us" (the default if blank) or "si" for metric
-	Debug     bool   `json:"debug"`   // set to true to
 }
 
 // SetUserAgent changes the string used for the User-Agent header when making
 // requests. See https://www.weather.gov/documentation/services-web-api
-// (Authentication) for details.  By default, this library uses the github.com URL.
+// (Authentication) for details.  By default, this module uses a github.com URL.
 func SetUserAgent(userAgent string) {
 	if len(userAgent) == 0 {
 		panic("the api requires a user-agent")
@@ -48,12 +47,14 @@ func SetConfig(c Config) {
 	config = c
 }
 
-// GetConfig is used to return the current configuration of the API. This allows
+// GetConfig is used to return the current configuration of the client. This allows
 // for testing and inspection as needed.
 func GetConfig() Config {
 	return config
 }
 
+// GetDefaultConfig returns a config struct that can be used as a starting point
+// for configuration changes. See examples in `example_test.go`.
 func GetDefaultConfig() Config {
 	return Config{
 		BaseURL:   API,
