@@ -1,3 +1,12 @@
+//go:build !examples
+// +build !examples
+
+// Unit tests can be run with `go test -v` and require access to the API. Many of
+// these tests are actually integration tests that call the weather.gov API and
+// parse responses accordingly to confirm expected responses are returned.
+//
+// Thus, in the future if weather.gov changes the endpoints or responses, these
+// tests should alert users of this wrapper SDK accordingly.
 package noaa_test
 
 import (
@@ -60,10 +69,9 @@ func TestMetricUnits(t *testing.T) {
 	if err != nil {
 		t.Error("noaa.Forecast() should return valid data for Chicago.")
 	}
-	if forecast.Units == "si" {
-		return
+	if forecast.Units != "si" {
+		t.Error("noaa.Forecast() should return valid data for Chicago in metric.")
 	}
-	t.Error("noaa.Forecast() should return valid data for Chicago in Metric.")
 }
 
 func TestUSUnits(t *testing.T) {
@@ -72,10 +80,9 @@ func TestUSUnits(t *testing.T) {
 	if err != nil {
 		t.Error("noaa.Forecast() should return valid data for Chicago.")
 	}
-	if forecast.Units == "us" {
-		return
+	if forecast.Units != "us" {
+		t.Error("noaa.Forecast() should return valid data for Chicago in standard units.")
 	}
-	t.Error("noaa.Forecast() should return valid data for Chicago in standard units.")
 }
 
 func TestChicagoOffice(t *testing.T) {
