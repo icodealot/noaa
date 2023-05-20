@@ -1,6 +1,9 @@
 package noaa
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // deprecated
 // Default values for the weather.gov REST API config which will
@@ -11,6 +14,11 @@ const (
 	API       = "https://api.weather.gov"
 	APIKey    = "github.com/icodealot/noaa" // User-Agent default value
 	APIAccept = "application/ld+json"       // Changes may affect struct mappings below
+)
+
+const (
+	templateEndpointOffices = "%s/offices/%s"   // base url, office id
+	templateEndpointPoints  = "%s/points/%s,%s" // base url, lat, lon
 )
 
 // Config instance for the API calls executed by the NOAA client.
@@ -26,6 +34,22 @@ type Config struct {
 	UserAgent string `json:"apiKey"`  // ex. (myweatherapp.com, contact@myweatherapp.com)
 	Accept    string `json:"accept"`  // application/geo+json, etc. defaults to ld+json
 	Units     string `json:"units"`   // "us" (the default if blank) or "si" for metric
+}
+
+func (c *Config) endpointOffices(id string) string {
+	return fmt.Sprintf(templateEndpointOffices, config.BaseURL, id)
+}
+
+func (c *Config) endpointPoints(lat string, lon string) string {
+	return fmt.Sprintf(templateEndpointPoints, config.BaseURL, lat, lon)
+}
+
+func (c *Config) getUnitsQueryParam(prefix string) string {
+	queryParam := ""
+	if config.Units != "" {
+		queryParam = prefix + "units=" + config.Units
+	}
+	return queryParam
 }
 
 // SetUserAgent changes the string used for the User-Agent header when making
