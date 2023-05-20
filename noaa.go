@@ -7,24 +7,24 @@ package noaa
 // key is expected to be PointsResponse.ID
 var pointsCache = map[string]*PointsResponse{}
 
-// Points returns a set of useful endpoints for a given <lat,lon>
-// or returns a cached object if appropriate
+// Points returns a reference to a PointsResponse (cached if appropriate)
+// which contains useful noaa endpoints for a given <lat,lon> to use in
+// subsequent calls to the api
 func Points(lat string, lon string) (points *PointsResponse, err error) {
 	endpoint := config.endpointPoints(lat, lon)
 	if pointsCache[endpoint] != nil {
 		return pointsCache[endpoint], nil
 	}
-
 	err = decode(endpoint, &points)
 	if err != nil {
 		return nil, err
 	}
-
 	pointsCache[endpoint] = points
 	return
 }
 
-// Office returns details for a specific office identified by its ID
+// Office returns a reference to a OfficeResponse which contains details
+// for a specific forecast office identified by ID
 // For example, https://api.weather.gov/offices/LOT (Chicago)
 func Office(id string) (office *OfficeResponse, err error) {
 	err = decode(config.endpointOffices(id), &office)
@@ -53,12 +53,10 @@ func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = decode(point.EndpointForecast+config.getUnitsQueryParam("?"), &forecast)
 	if err != nil {
 		return nil, err
 	}
-
 	forecast.Point = point
 	return
 }
@@ -69,12 +67,10 @@ func GridpointForecast(lat string, long string) (forecast *GridpointForecastResp
 	if err != nil {
 		return nil, err
 	}
-
 	err = decode(point.EndpointForecastGridData+config.getUnitsQueryParam("?"), &forecast)
 	if err != nil {
 		return nil, err
 	}
-
 	forecast.Point = point
 	return forecast, nil
 }
@@ -85,12 +81,10 @@ func HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, 
 	if err != nil {
 		return nil, err
 	}
-
 	err = decode(point.EndpointForecastHourly+config.getUnitsQueryParam("?"), &forecast)
 	if err != nil {
 		return nil, err
 	}
-
 	forecast.Point = point
 	return forecast, nil
 }

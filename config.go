@@ -16,11 +16,6 @@ const (
 	APIAccept = "application/ld+json"       // Changes may affect struct mappings below
 )
 
-const (
-	templateEndpointOffices = "%s/offices/%s"   // base url, office id
-	templateEndpointPoints  = "%s/points/%s,%s" // base url, lat, lon
-)
-
 // Config instance for the API calls executed by the NOAA client.
 var config = GetDefaultConfig()
 
@@ -35,6 +30,11 @@ type Config struct {
 	Accept    string `json:"accept"`  // application/geo+json, etc. defaults to ld+json
 	Units     string `json:"units"`   // "us" (the default if blank) or "si" for metric
 }
+
+const (
+	templateEndpointOffices = "%s/offices/%s"   // base url, office id
+	templateEndpointPoints  = "%s/points/%s,%s" // base url, lat, lon
+)
 
 func (c *Config) endpointOffices(id string) string {
 	return fmt.Sprintf(templateEndpointOffices, config.BaseURL, id)

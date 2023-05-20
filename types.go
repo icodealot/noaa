@@ -1,5 +1,9 @@
 package noaa
 
+// QuantitativeValue is available for various statistics and can be
+// enabled with an optional request header to the noaa API. In the
+// future it is expected at that QV will replace single values such
+// as measurements for Temperature
 type QuantitativeValue struct {
 	Value          float64 `json:"value"`
 	MaxValue       float64 `json:"maxValue"`
