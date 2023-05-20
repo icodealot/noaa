@@ -67,11 +67,7 @@ type ForecastElevation struct {
 }
 
 type ForecastHourlyElevation struct {
-	Value          float64 `json:"value"`
-	Max            float64 `json:"maxValue"`
-	Min            float64 `json:"minValue"`
-	UnitCode       string  `json:"unitCode"`
-	QualityControl string  `json:"qualityControl"`
+	QuantitativeValue
 }
 
 // ForecastResponsePeriod holds the JSON values for a period within a forecast response.
@@ -81,14 +77,21 @@ type ForecastResponsePeriod struct {
 	StartTime        string  `json:"startTime"`
 	EndTime          string  `json:"endTime"`
 	IsDaytime        bool    `json:"isDaytime"`
-	Temperature      float64 `json:"temperature"`
-	TemperatureUnit  string  `json:"temperatureUnit"`
-	TemperatureTrend string  `json:"temperatureTrend"`
-	WindSpeed        string  `json:"windSpeed"`
-	WindDirection    string  `json:"windDirection"`
-	Icon             string  `json:"icon"`
-	Summary          string  `json:"shortForecast"`
-	Details          string  `json:"detailedForecast"`
+	Temperature      float64 `json:"temperature.value"`
+	TemperatureUnit  string
+	TemperatureTrend string `json:"temperatureTrend"`
+	WindSpeed        string
+	WindDirection    string `json:"windDirection"`
+	Icon             string `json:"icon"`
+	Summary          string `json:"shortForecast"`
+	Details          string `json:"detailedForecast"`
+
+	QuantitativeProbability      QuantitativeValue `json:"probabilityOfPrecipitation"`
+	QuantitativeDewpoint         QuantitativeValue `json:"dewpoint"`
+	QuantitativeRelativeHumidity QuantitativeValue `json:"relativeHumidity"`
+	QuantitativeTemperature      QuantitativeValue `json:"temperature"`
+	QuantitativeWindSpeed        QuantitativeValue `json:"windSpeed"`
+	QuantitativeWindGust         QuantitativeValue `json:"windGust"`
 }
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.

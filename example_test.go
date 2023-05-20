@@ -101,7 +101,7 @@ func ExampleGetChicagoForecastWithMetricUnits() {
 
 	// Get the forecast for Chicago by lat/lon
 	forecast, err := noaa.Forecast("41.837", "-87.685")
-	if err != nil {
+	if err != nil || forecast == nil {
 		fmt.Printf("Error getting the forecast: %v", err)
 		return
 	}

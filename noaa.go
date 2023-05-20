@@ -47,6 +47,47 @@ func Stations(lat string, lon string) (stations *StationsResponse, err error) {
 	return
 }
 
+// Using the quantitative value feature flags to enable QV responses
+// seems to cause the API to ignore the requested unit types. This is
+// a temporary workaround which restores the expected values.
+func tempFixForecastPeriodUnits(periods []ForecastResponsePeriod) {
+	for i, period := range periods {
+		wmoUnitCode := period.QuantitativeTemperature.UnitCode
+		periods[i].Temperature = period.QuantitativeTemperature.Value
+		if config.Units == "si" {
+			periods[i].TemperatureUnit = "C"
+			// assume its degrees F so convert it
+			if wmoUnitCode != "wmoUnit:degC" {
+				periods[i].Temperature = (5.0 / 9.0) * (periods[i].Temperature - 32)
+			}
+		} else {
+			periods[i].TemperatureUnit = "F"
+			if wmoUnitCode == "wmoUnit:degC" {
+				periods[i].Temperature = ((9.0 / 5.0) * periods[i].Temperature) + 32
+			}
+		}
+	}
+}
+
+func tempFixForecastHourlyPeriodUnits(periods []ForecastResponsePeriodHourly) {
+	for i, period := range periods {
+		wmoUnitCode := period.QuantitativeTemperature.UnitCode
+		periods[i].Temperature = period.QuantitativeTemperature.Value
+		if config.Units == "si" {
+			periods[i].TemperatureUnit = "C"
+			// assume its degrees F so convert it
+			if wmoUnitCode != "wmoUnit:degC" {
+				periods[i].Temperature = (5.0 / 9.0) * (periods[i].Temperature - 32)
+			}
+		} else {
+			periods[i].TemperatureUnit = "F"
+			if wmoUnitCode == "wmoUnit:degC" {
+				periods[i].Temperature = ((9.0 / 5.0) * periods[i].Temperature) + 32
+			}
+		}
+	}
+}
+
 // Forecast returns an array of forecast observations (14 periods and 2/day max)
 func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 	point, err := Points(lat, lon)
@@ -58,6 +99,7 @@ func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 		return nil, err
 	}
 	forecast.Point = point
+	tempFixForecastPeriodUnits(forecast.Periods)
 	return
 }
 
@@ -86,5 +128,6 @@ func HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, 
 		return nil, err
 	}
 	forecast.Point = point
+	tempFixForecastHourlyPeriodUnits(forecast.Periods)
 	return forecast, nil
 }
