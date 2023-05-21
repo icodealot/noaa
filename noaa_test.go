@@ -66,8 +66,9 @@ func TestAlaska(t *testing.T) {
 func TestMetricUnits(t *testing.T) {
 	noaa.SetUnits("si")
 	forecast, err := noaa.Forecast("41.837", "-87.685")
-	if err != nil {
+	if err != nil || forecast == nil {
 		t.Error("noaa.Forecast() should return valid data for Chicago.")
+		return
 	}
 	if forecast.Units != "si" {
 		t.Error("noaa.Forecast() should return valid data for Chicago in metric.")

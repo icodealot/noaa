@@ -83,7 +83,7 @@ func ExampleGetChicagoForecast() {
 		return
 	}
 	for _, period := range forecast.Periods {
-		log.Printf("%-20s ---> %.0f%s\n", period.Name, period.Temperature, period.TemperatureUnit)
+		log.Printf("%-20s ---> Windspeed: %-15s Temperature: %.0f%s\n", period.Name, period.WindSpeed, period.Temperature, period.TemperatureUnit)
 	}
 
 	fmt.Println("Success!")
@@ -101,12 +101,12 @@ func ExampleGetChicagoForecastWithMetricUnits() {
 
 	// Get the forecast for Chicago by lat/lon
 	forecast, err := noaa.Forecast("41.837", "-87.685")
-	if err != nil {
+	if err != nil || forecast == nil {
 		fmt.Printf("Error getting the forecast: %v", err)
 		return
 	}
 	for _, period := range forecast.Periods {
-		log.Printf("%-20s ---> %.0f%s\n", period.Name, period.Temperature, period.TemperatureUnit)
+		log.Printf("%-20s ---> Windspeed: %-15s Temperature: %.0f%s\n", period.Name, period.WindSpeed, period.Temperature, period.TemperatureUnit)
 	}
 
 	fmt.Println("Success!")
@@ -121,13 +121,53 @@ func ExampleGetChicagoHourlyForecast() {
 	beforeEachExample()
 
 	// Get the hourly forecast for Chicago by lat/lon
-	forecast, err := noaa.HourlyForecast("41.837", "-87.685")
+	response, err := noaa.HourlyForecast("41.837", "-87.685")
 	if err != nil {
 		fmt.Printf("Error getting the forecast: %v", err)
 		return
 	}
-	for _, period := range forecast.Periods {
+	for _, period := range response.Periods {
 		log.Printf("at %s ... it will be %.0f%s\n", period.StartTime, period.Temperature, period.TemperatureUnit)
+	}
+
+	fmt.Println("Success!")
+
+	// Output:
+	// Success!
+}
+
+func ExampleGetChicagoGridpointForecast() {
+
+	// Cleanup global state before each example
+	beforeEachExample()
+
+	// Get the gridpoint forecast for Chicago by lat/lon
+	response, err := noaa.GridpointForecast("41.837", "-87.685")
+	if err != nil {
+		fmt.Printf("Error getting the gridpoint forecast: %v", err)
+		return
+	}
+	log.Printf("Gridpoint forecast:\n%+v\n", response)
+
+	fmt.Println("Success!")
+
+	// Output:
+	// Success!
+}
+
+func ExampleGetChicagoWeatherStations() {
+
+	// Cleanup global state before each example
+	beforeEachExample()
+
+	// Get the hourly forecast for Chicago by lat/lon
+	response, err := noaa.Stations("41.837", "-87.685")
+	if err != nil {
+		fmt.Printf("Error getting the stations: %v", err)
+		return
+	}
+	for _, station := range response.Stations {
+		log.Printf("Weather station: %s\n", station)
 	}
 
 	fmt.Println("Success!")
