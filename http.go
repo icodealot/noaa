@@ -35,6 +35,8 @@ func get(endpoint string) (res *http.Response, err error) {
 
 	req.Header.Add("Accept", config.Accept)
 	req.Header.Add("User-Agent", config.UserAgent)
+
+	// enable quantitative values in forecast responses
 	req.Header.Add("feature-flags", "forecast_temperature_qv, forecast_wind_speed_qv")
 
 	res, err = http.DefaultClient.Do(req)

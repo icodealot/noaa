@@ -3,6 +3,8 @@
 // by the National Weather Service, an agency of the United States.
 package noaa
 
+import "fmt"
+
 // Cache used for point lookup to save some HTTP round trips
 // key is expected to be PointsResponse.ID
 var pointsCache = map[string]*PointsResponse{}
@@ -47,47 +49,6 @@ func Stations(lat string, lon string) (stations *StationsResponse, err error) {
 	return
 }
 
-// Using the quantitative value feature flags to enable QV responses
-// seems to cause the API to ignore the requested unit types. This is
-// a temporary workaround which restores the expected values.
-func tempFixForecastPeriodUnits(periods []ForecastResponsePeriod) {
-	for i, period := range periods {
-		wmoUnitCode := period.QuantitativeTemperature.UnitCode
-		periods[i].Temperature = period.QuantitativeTemperature.Value
-		if config.Units == "si" {
-			periods[i].TemperatureUnit = "C"
-			// assume its degrees F so convert it
-			if wmoUnitCode != "wmoUnit:degC" {
-				periods[i].Temperature = (5.0 / 9.0) * (periods[i].Temperature - 32)
-			}
-		} else {
-			periods[i].TemperatureUnit = "F"
-			if wmoUnitCode == "wmoUnit:degC" {
-				periods[i].Temperature = ((9.0 / 5.0) * periods[i].Temperature) + 32
-			}
-		}
-	}
-}
-
-func tempFixForecastHourlyPeriodUnits(periods []ForecastResponsePeriodHourly) {
-	for i, period := range periods {
-		wmoUnitCode := period.QuantitativeTemperature.UnitCode
-		periods[i].Temperature = period.QuantitativeTemperature.Value
-		if config.Units == "si" {
-			periods[i].TemperatureUnit = "C"
-			// assume its degrees F so convert it
-			if wmoUnitCode != "wmoUnit:degC" {
-				periods[i].Temperature = (5.0 / 9.0) * (periods[i].Temperature - 32)
-			}
-		} else {
-			periods[i].TemperatureUnit = "F"
-			if wmoUnitCode == "wmoUnit:degC" {
-				periods[i].Temperature = ((9.0 / 5.0) * periods[i].Temperature) + 32
-			}
-		}
-	}
-}
-
 // Forecast returns an array of forecast observations (14 periods and 2/day max)
 func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 	point, err := Points(lat, lon)
@@ -99,7 +60,7 @@ func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
 		return nil, err
 	}
 	forecast.Point = point
-	tempFixForecastPeriodUnits(forecast.Periods)
+	updateForecastPeriods(forecast.Periods)
 	return
 }
 
@@ -128,6 +89,77 @@ func HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, 
 		return nil, err
 	}
 	forecast.Point = point
-	tempFixForecastHourlyPeriodUnits(forecast.Periods)
+	updateForecastPeriods(forecast.Periods)
 	return forecast, nil
+}
+
+// Using the quantitative value feature flags to enable QV responses
+// causes the noaa api to ignore the requested unit types. This also
+// populates fields that were previously populated for backward
+// compatibility. This is necessary because quantitative values replace
+// deprecated fields with a nested object. See: QuantitativeValue.
+// These are nice to have but may be deprecated in the future.
+func updateForecastPeriods(periods []ForecastResponsePeriod) {
+	for i, period := range periods {
+		updateTemperature(&period)
+		updateWindSpeed(&period)
+		periods[i] = period
+	}
+}
+
+// See: updateForecastPeriods
+func updateTemperature(period *ForecastResponsePeriod) {
+	wmoUnitCode := period.QuantitativeTemperature.UnitCode
+	period.Temperature = period.QuantitativeTemperature.Value
+	if config.Units == "si" {
+		period.TemperatureUnit = "C"
+		if wmoUnitCode != "wmoUnit:degC" {
+			// assume its degrees F so convert it accordingly
+			period.Temperature = (5.0 / 9.0) * (period.Temperature - 32)
+		}
+	} else {
+		period.TemperatureUnit = "F"
+		if wmoUnitCode == "wmoUnit:degC" {
+			period.Temperature = ((9.0 / 5.0) * period.Temperature) + 32
+		}
+	}
+}
+
+const (
+	KilometersPerMile = 1.60934
+	MilesPerKilometer = 0.62137
+)
+
+// See: updateForecastPeriods
+func updateWindSpeed(period *ForecastResponsePeriod) {
+	wmoUnitCode := period.QuantitativeWindSpeed.UnitCode
+	min := period.QuantitativeWindSpeed.MinValue
+	max := period.QuantitativeWindSpeed.MaxValue
+	value := period.QuantitativeWindSpeed.Value
+	units := ""
+
+	if config.Units == "si" {
+		units = "km/h"
+		if wmoUnitCode != "wmoUnit:km_h-1" {
+			// assume its mph so convert it accordingly
+			min *= KilometersPerMile
+			max *= KilometersPerMile
+			value *= KilometersPerMile
+		}
+	} else {
+		units = "mph"
+		if wmoUnitCode == "wmoUnit:km_h-1" {
+			// assume its kmh so convert it accordingly
+			min *= MilesPerKilometer
+			max *= MilesPerKilometer
+			value *= MilesPerKilometer
+		}
+	}
+
+	// replicates legacy api behavior but using quantitative values
+	if min == 0.0 && max == 0.0 {
+		period.WindSpeed = fmt.Sprintf("%.0f %s", value, units)
+	} else {
+		period.WindSpeed = fmt.Sprintf("%.0f to %.0f %s", min, max, units)
+	}
 }

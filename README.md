@@ -68,7 +68,25 @@ delay and backoff strategy, circuit breakers, etc.)
 A specific example can be run using:
 
 ```
-go test -tags=examples -run ^ExampleGetChicagoForecast$ -v
+> go test -tags=examples -run ^ExampleGetChicagoForecast$ -v
+=== RUN   ExampleGetChicagoForecast
+2023/05/21 09:27:08 Today                ---> Windspeed: 5 to 10 mph     Temperature: 76F
+2023/05/21 09:27:08 Tonight              ---> Windspeed: 5 to 10 mph     Temperature: 56F
+2023/05/21 09:27:08 Monday               ---> Windspeed: 5 to 10 mph     Temperature: 73F
+2023/05/21 09:27:08 Monday Night         ---> Windspeed: 5 to 10 mph     Temperature: 58F
+2023/05/21 09:27:08 Tuesday              ---> Windspeed: 5 to 10 mph     Temperature: 76F
+2023/05/21 09:27:08 Tuesday Night        ---> Windspeed: 5 to 10 mph     Temperature: 57F
+2023/05/21 09:27:08 Wednesday            ---> Windspeed: 5 to 20 mph     Temperature: 65F
+2023/05/21 09:27:08 Wednesday Night      ---> Windspeed: 15 mph          Temperature: 51F
+2023/05/21 09:27:08 Thursday             ---> Windspeed: 15 mph          Temperature: 62F
+2023/05/21 09:27:08 Thursday Night       ---> Windspeed: 10 to 15 mph    Temperature: 51F
+2023/05/21 09:27:08 Friday               ---> Windspeed: 10 mph          Temperature: 67F
+2023/05/21 09:27:08 Friday Night         ---> Windspeed: 5 to 10 mph     Temperature: 53F
+2023/05/21 09:27:08 Saturday             ---> Windspeed: 5 to 10 mph     Temperature: 73F
+2023/05/21 09:27:08 Saturday Night       ---> Windspeed: 10 mph          Temperature: 59F
+--- PASS: ExampleGetChicagoForecast (4.14s)
+PASS
+ok      github.com/icodealot/noaa       4.177s
 ```
 
 Here is an example of using the `github.com/icodealot/noaa` module to get

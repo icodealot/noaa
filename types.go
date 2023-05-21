@@ -66,10 +66,6 @@ type ForecastElevation struct {
 	Units string  `json:"unitCode"`
 }
 
-type ForecastHourlyElevation struct {
-	QuantitativeValue
-}
-
 // ForecastResponsePeriod holds the JSON values for a period within a forecast response.
 type ForecastResponsePeriod struct {
 	ID               int32   `json:"number"`
@@ -77,14 +73,14 @@ type ForecastResponsePeriod struct {
 	StartTime        string  `json:"startTime"`
 	EndTime          string  `json:"endTime"`
 	IsDaytime        bool    `json:"isDaytime"`
-	Temperature      float64 `json:"temperature.value"`
-	TemperatureUnit  string
-	TemperatureTrend string `json:"temperatureTrend"`
-	WindSpeed        string
-	WindDirection    string `json:"windDirection"`
-	Icon             string `json:"icon"`
-	Summary          string `json:"shortForecast"`
-	Details          string `json:"detailedForecast"`
+	Temperature      float64 // preserved for legacy compatibility, may be deprecated in the future
+	TemperatureUnit  string  // preserved for legacy compatibility, may be deprecated in the future
+	TemperatureTrend string  `json:"temperatureTrend"`
+	WindSpeed        string  // preserved for legacy compatibility, may be deprecated in the future
+	WindDirection    string  `json:"windDirection"`
+	Icon             string  `json:"icon"`
+	Summary          string  `json:"shortForecast"`
+	Details          string  `json:"detailedForecast"`
 
 	QuantitativeProbability      QuantitativeValue `json:"probabilityOfPrecipitation"`
 	QuantitativeDewpoint         QuantitativeValue `json:"dewpoint"`
@@ -95,13 +91,10 @@ type ForecastResponsePeriod struct {
 }
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
-type ForecastResponsePeriodHourly struct {
-	ForecastResponsePeriod
-}
+type ForecastResponsePeriodHourly = ForecastResponsePeriod
 
 // ForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>/forecast"
 type ForecastResponse struct {
-	// capture data from the forecast
 	Updated   string                   `json:"updated"`
 	Units     string                   `json:"units"`
 	Elevation ForecastElevation        `json:"elevation"`
@@ -162,7 +155,6 @@ type HourlyForecastResponse struct {
 // GridpointForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>"
 // See https://weather-gov.github.io/api/gridpoints for information.
 type GridpointForecastResponse struct {
-	// capture data from the forecast
 	Updated                          string                      `json:"updateTime"`
 	Elevation                        ForecastElevation           `json:"elevation"`
 	Weather                          Weather                     `json:"weather"`
