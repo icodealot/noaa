@@ -1,5 +1,9 @@
 package noaa
 
+import (
+	"time"
+)
+
 // QuantitativeValue is available for various statistics and can be
 // enabled with an optional request header to the noaa API. In the
 // future it is expected at that QV will replace single values such
@@ -228,4 +232,50 @@ type GridpointForecastTimeSeriesValue struct {
 type GridpointForecastTimeSeries struct {
 	Uom    string                             `json:"uom"` // Unit of Measure
 	Values []GridpointForecastTimeSeriesValue `json:"values"`
+}
+
+type Observation struct {
+	ID              string `json:"@id"`
+	IDType          string `json:"@type"`
+	Icon            string `json:"icon"`
+	TextDescription string
+	Station         string
+	Elevation       QuantitativeValue
+	Geometry        string // ex: POINT(-73.09 40.79)
+
+	Temperature               QuantitativeValue
+	MaxTemperatureLast24Hours QuantitativeValue
+	MinTemperatureLast24Hours QuantitativeValue
+
+	PrecipitationLastHour   QuantitativeValue
+	PrecipitationLast3Hours QuantitativeValue
+	PrecipitationLast6Hours QuantitativeValue
+
+	RelativeHumidity   QuantitativeValue
+	SeaLevelPressure   QuantitativeValue
+	Dewpoint           QuantitativeValue
+	BarometricPressure QuantitativeValue
+
+	WindChill     QuantitativeValue
+	WindGust      QuantitativeValue
+	WindDirection QuantitativeValue
+	WindSpeed     QuantitativeValue
+
+	HeatIndex  QuantitativeValue
+	Visibility QuantitativeValue
+
+	RawMessage string
+	Timestamp  time.Time
+
+	CloudLayers    []CloudLayerReading
+	PresentWeather []interface{}
+}
+
+type CloudLayerReading struct {
+	Amount string
+	Base   QuantitativeValue
+}
+
+type ObservationsResponse struct {
+	Observations []Observation `json:"@graph"`
 }

@@ -105,3 +105,14 @@ func TestChicagoHourly(t *testing.T) {
 		t.Error("expected at least one period")
 	}
 }
+
+func TestObservations(t *testing.T) {
+	resp, err := noaa.Observations("KISP")
+	if err != nil {
+		t.Error("noaa.Observations() should return valid data for KISP.")
+	}
+	if len(resp.Observations) == 0 {
+		t.Error("expected at least one observation")
+	}
+
+}
