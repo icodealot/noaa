@@ -163,3 +163,12 @@ func updateWindSpeed(period *ForecastResponsePeriod) {
 		period.WindSpeed = fmt.Sprintf("%.0f to %.0f %s", min, max, units)
 	}
 }
+
+func Observations(station string) (observations *ObservationsResponse, err error) {
+	endpoint := fmt.Sprintf("%s/stations/%s/observations", config.BaseURL, station)
+	err = decode(endpoint, &observations)
+	if err != nil {
+		return nil, err
+	}
+	return observations, nil
+}
