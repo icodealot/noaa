@@ -1,28 +1,16 @@
-// Package noaa implements a basic wrapper around api.weather.gov to
-// grab HTTP responses to endpoints (i.e.: weather & forecast data)
-// by the National Weather Service, an agency of the United States.
 package noaa
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"net/http"
-	"strings"
-)
-
-// Constant values for the weather.gov REST API
-const (
-	API       = "https://api.weather.gov"
-	APIKey    = "github.com/icodealot/noaa" // See auth docs at weather.gov
-	APIAccept = "application/ld+json"       // Changes may affect struct mappings below
-)
-
-// UserAgent provides the User-Agent header value used for API request.
-// This defaults to the APIKey const value.
-var userAgent = APIKey
-
-var client = http.DefaultClient
+// QuantitativeValue is available for various statistics and can be
+// enabled with an optional request header to the noaa API. In the
+// future it is expected at that QV will replace single values such
+// as measurements for Temperature
+type QuantitativeValue struct {
+	Value          float64 `json:"value"`
+	MaxValue       float64 `json:"maxValue"`
+	MinValue       float64 `json:"minValue"`
+	UnitCode       string  `json:"unitCode"`
+	QualityControl string  `json:"qualityControl"`
+}
 
 // PointsResponse holds the JSON values from /points/<lat,lon>
 type PointsResponse struct {
@@ -72,57 +60,41 @@ type StationsResponse struct {
 	Stations []string `json:"observationStations"`
 }
 
-// ForecastElevaion holds the JSON values for a forecast response's elevation.
+// ForecastElevation holds the JSON values for a forecast response's elevation.
 type ForecastElevation struct {
 	Value float64 `json:"value"`
 	Units string  `json:"unitCode"`
 }
 
-type ForecastHourlyElevation struct {
-	Value          float64 `json:"value"`
-	Max            float64 `json:"maxValue"`
-	Min            float64 `json:"minValue"`
-	UnitCode       string  `json:"unitCode"`
-	QualityControl string  `json:"qualityControl"`
-}
-
-// Period holds the JSON values for a period within a forecast response's periods.
+// ForecastResponsePeriod holds the JSON values for a period within a forecast response.
 type ForecastResponsePeriod struct {
 	ID               int32   `json:"number"`
 	Name             string  `json:"name"`
 	StartTime        string  `json:"startTime"`
 	EndTime          string  `json:"endTime"`
 	IsDaytime        bool    `json:"isDaytime"`
-	Temperature      float64 `json:"temperature"`
-	TemperatureUnit  string  `json:"temperatureUnit"`
+	Temperature      float64 // preserved for legacy compatibility, may be deprecated in the future
+	TemperatureUnit  string  // preserved for legacy compatibility, may be deprecated in the future
 	TemperatureTrend string  `json:"temperatureTrend"`
-	WindSpeed        string  `json:"windSpeed"`
+	WindSpeed        string  // preserved for legacy compatibility, may be deprecated in the future
 	WindDirection    string  `json:"windDirection"`
 	Icon             string  `json:"icon"`
 	Summary          string  `json:"shortForecast"`
 	Details          string  `json:"detailedForecast"`
+
+	QuantitativeProbability      QuantitativeValue `json:"probabilityOfPrecipitation"`
+	QuantitativeDewpoint         QuantitativeValue `json:"dewpoint"`
+	QuantitativeRelativeHumidity QuantitativeValue `json:"relativeHumidity"`
+	QuantitativeTemperature      QuantitativeValue `json:"temperature"`
+	QuantitativeWindSpeed        QuantitativeValue `json:"windSpeed"`
+	QuantitativeWindGust         QuantitativeValue `json:"windGust"`
 }
 
 // ForecastResponsePeriodHourly provides the JSON value for a period within an hourly forecast.
-type ForecastResponsePeriodHourly struct {
-	ID               int32   `json:"number"`
-	Name             string  `json:"name"`
-	StartTime        string  `json:"startTime"`
-	EndTime          string  `json:"endTime"`
-	IsDaytime        bool    `json:"isDaytime"`
-	Temperature      float64 `json:"temperature"`
-	TemperatureUnit  string  `json:"temperatureUnit"`
-	TemperatureTrend string  `json:"temperatureTrend"`
-	WindSpeed        string  `json:"windSpeed"`
-	WindDirection    string  `json:"windDirection"`
-	Icon             string  `json:"icon"`
-	Summary          string  `json:"shortForecast"`
-	Details          string  `json:"detailedForecast"`
-}
+type ForecastResponsePeriodHourly = ForecastResponsePeriod
 
 // ForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>/forecast"
 type ForecastResponse struct {
-	// capture data from the forecast
 	Updated   string                   `json:"updated"`
 	Units     string                   `json:"units"`
 	Elevation ForecastElevation        `json:"elevation"`
@@ -163,7 +135,7 @@ type HazardValue struct {
 	Value     []HazardValueItem `json:"value"`
 }
 
-// Hazard holds a hazard item from a GridpointForecastRespones's hazards
+// Hazard holds a slice of HazardValue items from a GridpointForecastResponse hazards
 type Hazard struct {
 	Values []HazardValue `json:"values"`
 }
@@ -183,7 +155,6 @@ type HourlyForecastResponse struct {
 // GridpointForecastResponse holds the JSON values from /gridpoints/<cwa>/<x,y>"
 // See https://weather-gov.github.io/api/gridpoints for information.
 type GridpointForecastResponse struct {
-	// capture data from the forecast
 	Updated                          string                      `json:"updateTime"`
 	Elevation                        ForecastElevation           `json:"elevation"`
 	Weather                          Weather                     `json:"weather"`
@@ -257,201 +228,4 @@ type GridpointForecastTimeSeriesValue struct {
 type GridpointForecastTimeSeries struct {
 	Uom    string                             `json:"uom"` // Unit of Measure
 	Values []GridpointForecastTimeSeriesValue `json:"values"`
-}
-
-// Cache used for point lookup to save some HTTP round trips
-// key is expected to be PointsResponse.ID
-var pointsCache = map[string]*PointsResponse{}
-
-// Call the weather.gov API. We could just use http.Get() but
-// since we need to include some custom header values this helps.
-func apiCall(endpoint string) (res *http.Response, err error) {
-	endpoint = strings.Replace(endpoint, "http://", "https://", -1)
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Accept", APIAccept)
-	req.Header.Add("User-Agent", userAgent) // See http://www.weather.gov/documentation/services-web-api
-
-	res, err = client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode == 404 {
-		defer res.Body.Close()
-		return nil, errors.New("404: data not found for -> " + endpoint)
-	}
-	return res, nil
-}
-
-// SetUserAgent changes the string used for the User-Agent header when making
-// requests.  See https://www.weather.gov/documentation/services-web-api
-// (Authentication) for details.  By default, this library uses APIKey for this
-// value.
-func SetUserAgent(useragent string) {
-	userAgent = useragent
-}
-
-
-// Points returns a reference to a PointsResponse (cached if appropriate)
-// which contains useful noaa endpoints for a given <lat,lon> to use in
-// subsequent calls to the api
-func Points(lat string, lon string) (points *PointsResponse, err error) {
-	endpoint := config.endpointPoints(lat, lon)
-	if pointsCache[endpoint] != nil {
-		return pointsCache[endpoint], nil
-	}
-	err = decode(endpoint, &points)
-	if err != nil {
-		return nil, err
-	}
-	pointsCache[endpoint] = points
-	return
-}
-
-// Office returns a reference to a OfficeResponse which contains details
-// for a specific forecast office identified by ID
-// For example, https://api.weather.gov/offices/LOT (Chicago)
-func Office(id string) (office *OfficeResponse, err error) {
-	err = decode(config.endpointOffices(id), &office)
-	if err != nil {
-		return nil, err
-	}
-	return
-}
-
-// Stations returns an array of observation station IDs (urls)
-func Stations(lat string, lon string) (stations *StationsResponse, err error) {
-	point, err := Points(lat, lon)
-	if err != nil {
-		return nil, err
-	}
-	err = decode(point.EndpointObservationStations, &stations)
-	if err != nil {
-		return nil, err
-	}
-	return
-}
-
-// Forecast returns an array of forecast observations (14 periods and 2/day max)
-func Forecast(lat string, lon string) (forecast *ForecastResponse, err error) {
-	point, err := Points(lat, lon)
-	if err != nil {
-		return nil, err
-	}
-	err = decode(point.EndpointForecast+config.getUnitsQueryParam("?"), &forecast)
-	if err != nil {
-		return nil, err
-	}
-	forecast.Point = point
-	updateForecastPeriods(forecast.Periods)
-	return
-}
-
-// GridpointForecast returns an array of raw forecast data
-func GridpointForecast(lat string, long string) (forecast *GridpointForecastResponse, err error) {
-	point, err := Points(lat, long)
-	if err != nil {
-		return nil, err
-	}
-	err = decode(point.EndpointForecastGridData+config.getUnitsQueryParam("?"), &forecast)
-	if err != nil {
-		return nil, err
-	}
-	forecast.Point = point
-	return forecast, nil
-}
-
-// HourlyForecast returns an array of raw hourly forecast data
-func HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, err error) {
-	point, err := Points(lat, long)
-	if err != nil {
-		return nil, err
-	}
-	err = decode(point.EndpointForecastHourly+config.getUnitsQueryParam("?"), &forecast)
-	if err != nil {
-		return nil, err
-	}
-	forecast.Point = point
-	updateForecastPeriods(forecast.Periods)
-	return forecast, nil
-}
-
-// SetClient sets the client for all API requests to use, returning the previous client used.
-func SetClient(preferred *http.Client) (result *http.Client) {
-	result = client
-	client = preferred
-	return
-  
-// Using the quantitative value feature flags to enable QV responses
-// causes the noaa api to ignore the requested unit types. This also
-// populates fields that were previously populated for backward
-// compatibility. This is necessary because quantitative values replace
-// deprecated fields with a nested object. See: QuantitativeValue.
-// These are nice to have but may be deprecated in the future.
-func updateForecastPeriods(periods []ForecastResponsePeriod) {
-	for i, period := range periods {
-		updateTemperature(&period)
-		updateWindSpeed(&period)
-		periods[i] = period
-	}
-}
-
-// See: updateForecastPeriods
-func updateTemperature(period *ForecastResponsePeriod) {
-	wmoUnitCode := period.QuantitativeTemperature.UnitCode
-	period.Temperature = period.QuantitativeTemperature.Value
-	if config.Units == "si" {
-		period.TemperatureUnit = "C"
-		if wmoUnitCode != "wmoUnit:degC" {
-			// assume its degrees F so convert it accordingly
-			period.Temperature = (5.0 / 9.0) * (period.Temperature - 32)
-		}
-	} else {
-		period.TemperatureUnit = "F"
-		if wmoUnitCode == "wmoUnit:degC" {
-			period.Temperature = ((9.0 / 5.0) * period.Temperature) + 32
-		}
-	}
-}
-
-const (
-	KilometersPerMile = 1.60934
-	MilesPerKilometer = 0.62137
-)
-
-// See: updateForecastPeriods
-func updateWindSpeed(period *ForecastResponsePeriod) {
-	wmoUnitCode := period.QuantitativeWindSpeed.UnitCode
-	min := period.QuantitativeWindSpeed.MinValue
-	max := period.QuantitativeWindSpeed.MaxValue
-	value := period.QuantitativeWindSpeed.Value
-	units := ""
-
-	if config.Units == "si" {
-		units = "km/h"
-		if wmoUnitCode != "wmoUnit:km_h-1" {
-			// assume its mph so convert it accordingly
-			min *= KilometersPerMile
-			max *= KilometersPerMile
-			value *= KilometersPerMile
-		}
-	} else {
-		units = "mph"
-		if wmoUnitCode == "wmoUnit:km_h-1" {
-			// assume its kmh so convert it accordingly
-			min *= MilesPerKilometer
-			max *= MilesPerKilometer
-			value *= MilesPerKilometer
-		}
-	}
-
-	// replicates legacy api behavior but using quantitative values
-	if min == 0.0 && max == 0.0 {
-		period.WindSpeed = fmt.Sprintf("%.0f %s", value, units)
-	} else {
-		period.WindSpeed = fmt.Sprintf("%.0f to %.0f %s", min, max, units)
-	}
 }
