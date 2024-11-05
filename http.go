@@ -39,7 +39,12 @@ func get(endpoint string) (res *http.Response, err error) {
 	// enable quantitative values in forecast responses
 	req.Header.Add("feature-flags", "forecast_temperature_qv, forecast_wind_speed_qv")
 
-	res, err = http.DefaultClient.Do(req)
+	// lazy-init client to http.DefaultClient.
+	if config.Client == nil {
+		config.Client = http.DefaultClient
+	}
+
+	res, err = config.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}

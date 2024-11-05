@@ -2,6 +2,7 @@ package noaa
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -9,7 +10,8 @@ import (
 // Default values for the weather.gov REST API config which will
 // be replaced by Config. These are subject to deletion in the future.
 // Instead, use noaa.GetConfig followed by:
-//     Config.BaseURL, Config.UserAgent, Config.Accept
+//
+//	Config.BaseURL, Config.UserAgent, Config.Accept
 const (
 	API       = "https://api.weather.gov"
 	APIKey    = "github.com/icodealot/noaa" // User-Agent default value
@@ -25,10 +27,11 @@ var config = GetDefaultConfig()
 // future weather.gov might change this behavior.
 // See http://www.weather.gov/documentation/services-web-api
 type Config struct {
-	BaseURL   string `json:"baseUrl"` // Do not include a trailing slash
-	UserAgent string `json:"apiKey"`  // ex. (myweatherapp.com, contact@myweatherapp.com)
-	Accept    string `json:"accept"`  // application/geo+json, etc. defaults to ld+json
-	Units     string `json:"units"`   // "us" (the default if blank) or "si" for metric
+	BaseURL   string       `json:"baseUrl"` // Do not include a trailing slash
+	UserAgent string       `json:"apiKey"`  // ex. (myweatherapp.com, contact@myweatherapp.com)
+	Accept    string       `json:"accept"`  // application/geo+json, etc. defaults to ld+json
+	Units     string       `json:"units"`   // "us" (the default if blank) or "si" for metric
+	Client    *http.Client `json:"-"`       // The client to use for requests (http.DefaultClient by default).
 }
 
 const (
@@ -73,6 +76,13 @@ func SetUnits(uom string) {
 	}
 }
 
+// SetClient sets the http.Client used for requests, returning the previous client.
+func SetClient(client *http.Client) (result *http.Client) {
+	result = config.Client
+	config.Client = client
+	return
+}
+
 // SetConfig replaces the config with all new values in one call. The individual
 // Set* functions can also be used to replace only specified values.
 func SetConfig(c Config) {
@@ -96,6 +106,7 @@ func GetDefaultConfig() Config {
 		UserAgent: APIKey,
 		Accept:    APIAccept,
 		Units:     "", // defaults to US units if unspecified
+		Client:    http.DefaultClient,
 	}
 }
 
