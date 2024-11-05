@@ -22,6 +22,8 @@ const (
 // This defaults to the APIKey const value.
 var userAgent = APIKey
 
+var client = http.DefaultClient
+
 // PointsResponse holds the JSON values from /points/<lat,lon>
 type PointsResponse struct {
 	ID                          string `json:"@id"`
@@ -272,7 +274,7 @@ func apiCall(endpoint string) (res *http.Response, err error) {
 	req.Header.Add("Accept", APIAccept)
 	req.Header.Add("User-Agent", userAgent) // See http://www.weather.gov/documentation/services-web-api
 
-	res, err = http.DefaultClient.Do(req)
+	res, err = client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -423,4 +425,11 @@ func HourlyForecast(lat string, long string) (forecast *HourlyForecastResponse, 
 	}
 	forecast.Point = point
 	return forecast, nil
+}
+
+// SetClient sets the client for all API requests to use, returning the previous client used.
+func SetClient(preferred *http.Client) (result *http.Client) {
+	result = client
+	client = preferred
+	return
 }
