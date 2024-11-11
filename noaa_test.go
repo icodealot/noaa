@@ -114,17 +114,14 @@ func TestSetClient(t *testing.T) {
 		Timeout: time.Millisecond,
 	}
 
-	// Don't set client to ensure this still works as normal.
+	// Don't set the client, to ensure this still works as normal.
 	_, err := noaa.HourlyForecast("41.837", "-87.685")
 	if err != nil {
 		t.Errorf("should have successfully returned a result instead of this error: %s", err)
 	}
 
 	// Set the client to test this feature.
-	orig := noaa.SetClient(client)
-	if orig != nil && orig != http.DefaultClient {
-		t.Error("original client should have been nil or http.DefaultClient")
-	}
+	noaa.SetClient(client)
 
 	// See if we can make a (failing) request with this.
 	_, err = noaa.HourlyForecast("41.837", "-87.685")
@@ -132,13 +129,8 @@ func TestSetClient(t *testing.T) {
 		t.Error("should have failed the request, 1 millisecond is too short a timeout to make the request")
 	}
 
-	// nil or http.DefaultClient should return to the original client.
-	orig = noaa.SetClient(nil)
-	if orig != client {
-		t.Error("expected the client I passed in, but got something else.")
-	}
-
-	// Ensure we can still make requests after setting to nil.
+	// Test that setting to nil returns to http.DefaultClient.
+	noaa.SetClient(nil)
 	_, err = noaa.HourlyForecast("41.837", "-87.685")
 	if err != nil {
 		t.Errorf("should have successfully returned a result instead of this error: %s", err)

@@ -10,8 +10,7 @@ import (
 // Default values for the weather.gov REST API config which will
 // be replaced by Config. These are subject to deletion in the future.
 // Instead, use noaa.GetConfig followed by:
-//
-//	Config.BaseURL, Config.UserAgent, Config.Accept
+//	   Config.BaseURL, Config.UserAgent, Config.Accept
 const (
 	API       = "https://api.weather.gov"
 	APIKey    = "github.com/icodealot/noaa" // User-Agent default value
@@ -76,11 +75,10 @@ func SetUnits(uom string) {
 	}
 }
 
-// SetClient sets the http.Client used for requests, returning the previous client.
-func SetClient(client *http.Client) (result *http.Client) {
-	result = config.Client
+// SetClient sets the http.Client used for requests.
+// Setting this to nil causes the uses of http.DefaultClient.
+func SetClient(client *http.Client) {
 	config.Client = client
-	return
 }
 
 // SetConfig replaces the config with all new values in one call. The individual
