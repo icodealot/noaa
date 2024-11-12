@@ -10,7 +10,9 @@
 package noaa_test
 
 import (
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/icodealot/noaa"
 )
@@ -103,5 +105,34 @@ func TestChicagoHourly(t *testing.T) {
 	}
 	if len(hourly.Periods) == 0 {
 		t.Error("expected at least one period")
+	}
+}
+
+func TestSetClient(t *testing.T) {
+	// Intentionally create a client with an absurd timeout value.
+	client := &http.Client{
+		Timeout: time.Millisecond,
+	}
+
+	// Don't set the client, to ensure this still works as normal.
+	_, err := noaa.HourlyForecast("41.837", "-87.685")
+	if err != nil {
+		t.Errorf("should have successfully returned a result instead of this error: %s", err)
+	}
+
+	// Set the client to test this feature.
+	noaa.SetClient(client)
+
+	// See if we can make a (failing) request with this.
+	_, err = noaa.HourlyForecast("41.837", "-87.685")
+	if err == nil {
+		t.Error("should have failed the request, 1 millisecond is too short a timeout to make the request")
+	}
+
+	// Test that setting to nil returns to http.DefaultClient.
+	noaa.SetClient(nil)
+	_, err = noaa.HourlyForecast("41.837", "-87.685")
+	if err != nil {
+		t.Errorf("should have successfully returned a result instead of this error: %s", err)
 	}
 }

@@ -9,6 +9,8 @@ package noaa_test
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/icodealot/noaa"
 )
@@ -174,6 +176,29 @@ func ExampleGetChicagoWeatherStations() {
 
 	// Output:
 	// Success!
+}
+
+func ExampleSetClient() {
+
+	// Cleanup global state before each example
+	beforeEachExample()
+
+	// Use a client that can't successfully make a request.
+	noaa.SetClient(&http.Client{
+		Timeout: time.Millisecond * 1,
+	})
+
+	// Get the hourly forecast for Chicago by lat/lon
+	_, err := noaa.Stations("41.837", "-87.685")
+	if err != nil {
+		fmt.Printf("Error getting the stations: %v", err)
+		return
+	}
+
+	fmt.Println("Success!")
+
+	// Output:
+	// Error getting the stations: Get "https://api.weather.gov/gridpoints/LOT/74,71/stations": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 }
 
 // beforeEachExample is used to clean up the global state of the noaa client
