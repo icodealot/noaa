@@ -73,7 +73,7 @@ func ExampleSetUnits() {
 	// Units should now be: si
 }
 
-func ExampleGetChicagoForecast() {
+func Example_getChicagoForecast() {
 
 	// Cleanup global state before each example
 	beforeEachExample()
@@ -94,7 +94,7 @@ func ExampleGetChicagoForecast() {
 	// Success!
 }
 
-func ExampleGetChicagoForecastWithMetricUnits() {
+func Example_getChicagoForecastWithMetricUnits() {
 
 	// Cleanup global state before each example
 	beforeEachExample()
@@ -117,7 +117,7 @@ func ExampleGetChicagoForecastWithMetricUnits() {
 	// Success!
 }
 
-func ExampleGetChicagoHourlyForecast() {
+func Example_getChicagoHourlyForecast() {
 
 	// Cleanup global state before each example
 	beforeEachExample()
@@ -138,7 +138,7 @@ func ExampleGetChicagoHourlyForecast() {
 	// Success!
 }
 
-func ExampleGetChicagoGridpointForecast() {
+func Example_getChicagoGridpointForecast() {
 
 	// Cleanup global state before each example
 	beforeEachExample()
@@ -157,7 +157,7 @@ func ExampleGetChicagoGridpointForecast() {
 	// Success!
 }
 
-func ExampleGetChicagoWeatherStations() {
+func Example_getChicagoWeatherStations() {
 
 	// Cleanup global state before each example
 	beforeEachExample()

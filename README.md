@@ -68,7 +68,7 @@ delay and backoff strategy, circuit breakers, etc.)
 A specific example can be run using:
 
 ```
-> go test -tags=examples -run ^ExampleGetChicagoForecast$ -v
+> go test -tags=examples -run ^Example_getChicagoForecast$ -v
 === RUN   ExampleGetChicagoForecast
 2023/05/21 09:27:08 Today                ---> Windspeed: 5 to 10 mph     Temperature: 76F
 2023/05/21 09:27:08 Tonight              ---> Windspeed: 5 to 10 mph     Temperature: 56F

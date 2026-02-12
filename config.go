@@ -10,7 +10,8 @@ import (
 // Default values for the weather.gov REST API config which will
 // be replaced by Config. These are subject to deletion in the future.
 // Instead, use noaa.GetConfig followed by:
-//	   Config.BaseURL, Config.UserAgent, Config.Accept
+//
+//	Config.BaseURL, Config.UserAgent, Config.Accept
 const (
 	API       = "https://api.weather.gov"
 	APIKey    = "github.com/icodealot/noaa" // User-Agent default value
